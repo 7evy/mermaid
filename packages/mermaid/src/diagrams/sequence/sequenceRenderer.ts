@@ -676,7 +676,15 @@ function adjustCreatedDestroyedData(
   destroyedActors
 ) {
   function receiverAdjustment(actor, adjustment) {
-    if (actor.x < actors[msg.from].x) {
+    if (actors[msg.from] === actors[msg.to]) {
+      bounds.insert(
+        msgModel.startx,
+        msgModel.starty,
+        msgModel.startx,
+        msgModel.stopy + actor.height + conf.noteMargin
+      );
+      msgModel.stopx = msgModel.startx;
+    } else if (actor.x < actors[msg.from].x) {
       bounds.insert(
         msgModel.stopx - adjustment,
         msgModel.starty,
@@ -722,6 +730,16 @@ function adjustCreatedDestroyedData(
     receiverAdjustment(actor, adjustment);
     actor.starty = lineStartY - actor.height / 2;
     bounds.bumpVerticalPos(actor.height / 2);
+  }
+  // if it is a destroy self message
+  else if (destroyedActors[msg.to] == index && destroyedActors[msg.from] == index) {
+    const actor = actors[msg.to];
+    if (conf.mirrorActors) {
+      const adjustment = actor.type == 'actor' ? ACTOR_TYPE_WIDTH / 2 : actor.width / 2;
+      receiverAdjustment(actor, adjustment);
+    }
+    actor.stopy = lineStartY + actor.height / 2;
+    bounds.bumpVerticalPos(actor.height + conf.noteMargin);
   }
   // if it is a destroy sender message
   else if (destroyedActors[msg.from] == index) {
